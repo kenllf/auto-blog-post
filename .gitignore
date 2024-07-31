@@ -3,3 +3,9 @@
 __pycache__/
 last_published.txt
 config/common.yaml
+
+# .history
+.history
+
+# python 虚拟环境
+myenv

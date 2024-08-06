@@ -1,3 +1,4 @@
+import random
 import pyperclip
 import sys
 
@@ -34,6 +35,30 @@ from utils.yaml_file_utils import (
 )
 
 
+def close_ai_assistant(driver):
+    # 随机选择位方法
+    # if random.choice([True, False]):
+    close_button = driver.find_element(By.CSS_SELECTOR, "h1.header svg.close-btn")
+    # else:
+    #     close_button = driver.find_element(
+    #         By.XPATH,
+    #         "//h1[contains(@class, 'header')]//svg[contains(@class, 'close-btn')]",
+    #     )
+
+    # 模拟鼠标移动
+    actions = ActionChains(driver)
+    actions.move_to_element(close_button).perform()
+
+    # 随机等待
+    exponential_sleep(2)  # 等待2秒
+
+    # 点击
+    close_button.click()
+
+    # 随机等待
+    exponential_sleep(2)  # 等待2秒
+
+
 def toutiao_publisher(driver, publish_data: PublishData):
     toutiao_config = read_toutiao()  # 读取头条配置
     common_config = read_common()  # 读取通用配置
@@ -59,6 +84,8 @@ def toutiao_publisher(driver, publish_data: PublishData):
 
     title.send_keys(publish_data.title)  # 设置标题内容
     exponential_sleep(2)  # 等待2秒
+
+    close_ai_assistant(driver)  # 关闭 头条创作助手
 
     # 正文内容设置
     content_file_html = convert_content_to_html(
@@ -86,7 +113,9 @@ def toutiao_publisher(driver, publish_data: PublishData):
     content_element.click()  # 点击一下
     exponential_sleep(1)  # 等待1秒
 
-    action_chains.key_down(cmd_ctrl).send_keys("v").key_up(cmd_ctrl).perform()  # 粘贴
+    action_chains.key_down(cmd_ctrl).send_keys("v").key_up(
+        cmd_ctrl
+    ).perform()  # 粘贴正文内容
     exponential_sleep(3)  # 等待3秒
 
     # # 展示封面
@@ -106,11 +135,20 @@ def toutiao_publisher(driver, publish_data: PublishData):
     # # TODO
 
     # # 原创首发
+    # 声明首发
     original_button = driver.find_element(
-        By.XPATH, '//div[@class="original-tag"]//span[contains(text(),"声明原创")]'
+        By.XPATH,
+        '//div[contains(@class, "exclusive-checkbox-wraper")]//label[contains(@class, "byte-checkbox")]//input[@type="checkbox"]',
     )
-    original_button.click()
+    if not original_button.is_selected():
+        original_button.click()
     exponential_sleep(2)  # 等待2秒
+
+    # original_button = driver.find_element(
+    #     By.XPATH, '//div[@class="original-tag"]//span[contains(text(),"声明原创")]'
+    # )
+    # original_button.click()
+    # exponential_sleep(2)  # 等待2秒
 
     # # 合集
     # # TODO

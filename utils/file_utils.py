@@ -1,12 +1,12 @@
 import os
 import re
-import subprocess
-from tempfile import gettempdir
-from urllib.parse import urlparse
-
 import requests
+import subprocess
+import tempfile
 import yaml
 
+from tempfile import gettempdir
+from urllib.parse import urlparse
 from utils.yaml_file_utils import read_common
 
 # 获取当前脚本的绝对路径
@@ -21,7 +21,7 @@ script_dir = os.path.dirname(script_path)
 # print("脚本所在的目录是:", script_dir)
 
 
-def list_all_files(video_dir, extension='.mp4'):
+def list_all_files(video_dir, extension=".mp4"):
     return_files = []
     for root, dirs, files in os.walk(video_dir):
         for file in files:
@@ -30,7 +30,7 @@ def list_all_files(video_dir, extension='.mp4'):
     return sorted(return_files)
 
 
-def list_files(video_dir, extension='.mp4'):
+def list_files(video_dir, extension=".mp4"):
     return_files = []
     for file in os.listdir(video_dir):
         if file.endswith(extension):
@@ -40,7 +40,7 @@ def list_files(video_dir, extension='.mp4'):
 
 def read_head(file):
     if os.path.exists(file):
-        with open(file, 'r', encoding='UTF-8') as file:
+        with open(file, "r", encoding="UTF-8") as file:
             # 读取文件内容
             head = file.readline()
             return head
@@ -49,13 +49,13 @@ def read_head(file):
 
 
 def write_to_file(content, file_name):
-    with open(file_name, 'w', encoding='UTF-8') as file:
+    with open(file_name, "w", encoding="UTF-8") as file:
         file.write(content)
 
 
 # 读取第一行之后 添加一个回车，适用于第一行是文章标题的情况
 def read_file_with_extra_enter(file):
-    with open(file, 'r', encoding='UTF-8') as f:
+    with open(file, "r", encoding="UTF-8") as f:
         # 读取文件内容
         content = f.read()
         # 使用splitlines()将内容分割成行列表
@@ -63,15 +63,15 @@ def read_file_with_extra_enter(file):
         # 检查列表是否为空，并且只处理第一行（如果存在）
         if lines:
             # 在第一行末尾添加换行符（如果它不存在）
-            if not lines[0].endswith('\n'):
-                lines[0] += '\n'
+            if not lines[0].endswith("\n"):
+                lines[0] += "\n"
         # 使用join()将行重新组合成字符串
-        cleaned_content = '\n'.join(lines)
+        cleaned_content = "\n".join(lines)
         return cleaned_content
 
 
 def read_file(file):
-    with open(file, 'r', encoding='UTF-8') as file:
+    with open(file, "r", encoding="UTF-8") as file:
         # 读取文件内容
         content = file.read()
         cleaned_content = remove_front_matter(content)
@@ -80,7 +80,7 @@ def read_file(file):
 
 
 def read_file_all_content(file):
-    with open(file, 'r', encoding='UTF-8') as file:
+    with open(file, "r", encoding="UTF-8") as file:
         # 读取文件内容
         content = file.read()
         cleaned_content = remove_truncate_content(content)
@@ -88,25 +88,27 @@ def read_file_all_content(file):
 
 
 def read_file_with_footer(file):
-    with open(file, 'r', encoding='UTF-8') as file:
+    with open(file, "r", encoding="UTF-8") as file:
         # 读取文件内容
         content = file.read()
         cleaned_content = remove_front_matter(content)
         cleaned_content = remove_truncate_content(cleaned_content)
         common_config = read_common()
         footer = ""
-        if common_config['include_footer']:
+        if common_config["include_footer"]:
             current_dir = os.getcwd()
-            footer = read_file(os.path.join(current_dir, 'config/footer.md'))
+            footer = read_file(os.path.join(current_dir, "config/footer.md"))
 
         return cleaned_content + "\n" + footer
 
 
 def remove_front_matter(markdown_content):
     # 正则表达式匹配front matter，假设它以'---'开始和结束
-    front_matter_pattern = r'^---[\s\S]*?---'
+    front_matter_pattern = r"^---[\s\S]*?---"
     # 使用re.sub替换front matter为空字符串
-    cleaned_content = re.sub(front_matter_pattern, '', markdown_content, flags=re.MULTILINE)
+    cleaned_content = re.sub(
+        front_matter_pattern, "", markdown_content, flags=re.MULTILINE
+    )
     return cleaned_content
 
 
@@ -122,7 +124,7 @@ def parse_front_matter(content_file):
     markdown_content = read_file_all_content(content_file)
     # 使用正则表达式匹配Front matter部分
     # front_matter_pattern = re.compile(r'^---\n(.+?)\n---', re.DOTALL | re.MULTILINE)
-    front_matter_pattern = re.compile(r'^---\n(.+?)\n---', re.DOTALL)
+    front_matter_pattern = re.compile(r"^---\n(.+?)\n---", re.DOTALL)
     # 搜索并提取Front matter
     front_matter_match = front_matter_pattern.search(markdown_content)
     if front_matter_match:
@@ -136,38 +138,54 @@ def parse_front_matter(content_file):
         print("没有找到Front matter部分。")
     return metadata
 
+
 def convert_md_to_html(md_filename, include_footer=True):
     # 获取文件名（不包含扩展名）和目录
     base_name = os.path.splitext(md_filename)[0]
     directory = os.path.dirname(md_filename)
 
     # 构建输出的HTML文件名
-    html_filename = os.path.join(directory, base_name + str(include_footer) + '.html')
+    html_filename = os.path.join(directory, base_name + str(include_footer) + ".html")
 
     # 如果HTML文件已经存在，直接返回
     if os.path.exists(html_filename):
         return html_filename
 
     # 同一目录下另一个文件的路径
-    pandoc_css_path = os.path.join(script_dir, 'pandoc.css')
+    pandoc_css_path = os.path.join(script_dir, "pandoc.css")
+
+    title = "article to publish"
 
     # 构造pandoc命令
-    command = ['pandoc', '--standalone', '--css', pandoc_css_path, '-f', 'markdown', '-t', 'html5', '--no-highlight',
-               md_filename, '-o',
-               html_filename]
+    command = [
+        "pandoc",
+        "--standalone",
+        "--css",
+        pandoc_css_path,
+        "-f",
+        "markdown",
+        "-t",
+        "html5",
+        "--no-highlight",
+        md_filename,
+        "-o",
+        html_filename,
+    ]
 
     # 调用系统命令
     subprocess.run(command)
 
     common_config = read_common()
     if include_footer:
-        if common_config['include_footer']:
+        if common_config["include_footer"]:
             current_dir = os.getcwd()
-            footer = os.path.join(current_dir, 'config/footer.html')
+            footer = os.path.join(current_dir, "config/footer.html")
 
             # 把footer合并到html中
             # 打开两个文件：一个用于读取，另一个用于写入
-            with open(footer, 'r', encoding='UTF-8') as source_file, open(html_filename, 'a', encoding='UTF-8') as destination_file:
+            with open(footer, "r", encoding="UTF-8") as source_file, open(
+                html_filename, "a", encoding="UTF-8"
+            ) as destination_file:
                 # 读取源文件的内容
                 source_content = source_file.read()
                 # 将读取的内容追加到目标文件的末尾
@@ -177,9 +195,40 @@ def convert_md_to_html(md_filename, include_footer=True):
     return html_filename
 
 
+def convert_content_to_html(content: str, include_footer=True):
+    """
+    将字符串类型的文章内容转换为 HTML 文件
+
+    参数:
+    - content (str): 字符串类型的文章内容
+    - include_footer (bool, optional): 是否在生成的 HTML 文件中包含页脚，默认为 True
+
+    返回:
+    - str: 转换后的 HTML 文件路径
+    """
+
+    # 创建一个临时的 Markdown 文件
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=".md", mode="w", encoding="utf-8"
+    ) as temp_md_file:
+        temp_md_filename = temp_md_file.name
+        # temp_md_file.write(
+        #     "---\ntitle: article to publish\n---\n\n"
+        # )  # 在内容前添加标题元数据
+        temp_md_file.write(content)
+
+    html_filename = convert_md_to_html(
+        temp_md_filename, include_footer
+    )  # 将临时 Markdown 文件转换为 HTML
+
+    os.remove(temp_md_filename)  # 删除临时的 Markdown 文件
+
+    return html_filename  # 返回转换后的 HTML 文件路径
+
+
 def download_image(url):
     # 检查URL是否以http开头
-    if not url.startswith('http'):
+    if not url.startswith("http"):
         print("URL does not start with 'http'. Skipping download.")
         return url
 
@@ -199,7 +248,7 @@ def download_image(url):
 
         # 检查请求是否成功
         if response.status_code == 200:
-            with open(file_path, 'wb') as f:
+            with open(file_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:  # 过滤掉保持连接的chunk
                         f.write(chunk)
@@ -210,6 +259,7 @@ def download_image(url):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     parse_front_matter("test.md")

@@ -10,7 +10,7 @@ def wait_login(driver, element_type, element_value):
         print("等待用户登录")
         wait_login_time = common_config["wait_login_time"]
         try:
-            # 设置显式等待的时间 默认120s
+            # 设置显式等待的时间（默认 120s）
             wait = WebDriverWait(driver, wait_login_time)
             # 等待元素出现
             wait.until(EC.presence_of_element_located((element_type, element_value)))

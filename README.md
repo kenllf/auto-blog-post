@@ -1,16 +1,22 @@
 - [blog-auto-publishing-tools博客自动发布工具](#blog-auto-publishing-tools博客自动发布工具)
 - [介绍](#介绍)
+- [更新预告](#更新预告)
 - [更新列表](#更新列表)
 - [功能列表](#功能列表)
   - [从浏览器自动发布](#从浏览器自动发布)
   - [后续功能](#后续功能)
 - [支持的浏览器](#支持的浏览器)
 - [使用方法](#使用方法)
+  - [配置文件](#配置文件)
   - [使用chrome](#使用chrome)
   - [使用firefox](#使用firefox)
   - [设置封面](#设置封面)
   - [其他配置](#其他配置)
   - [运行程序](#运行程序)
+        - [配置环境](#配置环境)
+        - [安装 Pandoc](#安装-pandoc)
+- [实例展示](#实例展示)
+- [加入讨论组](#加入讨论组)
 - [系列教程](#系列教程)
 
 
@@ -214,18 +220,13 @@ enable:
 
 ## 运行程序
 
-安装python依赖：
-
-```python
-pip install -r requirements.txt 
+##### 配置环境
+```bash
+./setup_venv.sh # 启动 python 虚拟环境，安装 requirement.txt 的包
 ```
 
-或者使用我自己做的安装脚本：
-
-windows下面执行： setup.bat 
-linux下面执行： setup.sh
-
-本工具使用了pandoc  https://www.pandoc.org/  来进行markdown 到html的转化。
+##### 安装 Pandoc
+本工具使用了 Pandoc[https://www.pandoc.org/] 来进行 markdown 到 html的转化。
 
 有些博客平台不支持markdown格式，所以需要安装pandoc。
 
